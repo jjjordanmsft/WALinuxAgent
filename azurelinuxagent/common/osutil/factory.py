@@ -31,6 +31,7 @@ from .ubuntu import UbuntuOSUtil, Ubuntu12OSUtil, Ubuntu14OSUtil, \
                     UbuntuSnappyOSUtil
 from .alpine import AlpineOSUtil
 from .bigip import BigIpOSUtil
+from .arch import ArchOSUtil
 
 def get_osutil(distro_name=DISTRO_NAME, distro_version=DISTRO_VERSION,
                distro_full_name=DISTRO_FULL_NAME):
@@ -73,6 +74,8 @@ def get_osutil(distro_name=DISTRO_NAME, distro_version=DISTRO_VERSION,
         return FreeBSDOSUtil()
     elif distro_name == "bigip":
         return BigIpOSUtil()
+    elif distro_name == "arch":
+        return ArchOSUtil()
     else:
         logger.warn("Unable to load distro implementation for {0}.", distro_name)
         logger.warn("Use default distro implementation instead.")
