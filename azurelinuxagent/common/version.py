@@ -79,9 +79,11 @@ def get_distro():
     if os.path.exists("/shared/vadc"):
         osinfo = get_f5_platform()
 
-    # platform can't figure out arch on 2.x
+    # platform can't figure out arch on python2.x
     if os.path.exists("/etc/arch-release"):
-        osinfo = ['arch', '', 'Arch Linux']
+        osinfo[0] = "arch"
+        osinfo[2] = "arch"
+        osinfo[3] = "Arch Linux"
 
     # Remove trailing whitespace and quote in distro name
     osinfo[0] = osinfo[0].strip('"').strip(' ').lower()
