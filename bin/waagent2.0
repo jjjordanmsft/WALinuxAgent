@@ -917,7 +917,6 @@ class SuSEDistro(AbstractDistro):
             return 1
         else:
             return 0
-        
 
     def installAgentServiceScriptFiles(self):
         try:
@@ -1105,11 +1104,9 @@ class oracleDistro(redhatDistro):
     def __init__(self):
         super(oracleDistro, self).__init__()
 
-
-
-############################################################    
+############################################################
 #	asianuxDistro
-############################################################    
+############################################################
 
 class asianuxDistro(redhatDistro):
     """
@@ -1119,6 +1116,64 @@ class asianuxDistro(redhatDistro):
     def __init__(self):
         super(asianuxDistro,self).__init__()
 
+############################################################
+#   archDistro
+############################################################
+
+class archDistro(AbstractDistro):
+    """
+    ArchLinux Distro concrete class
+    """
+    def __init__(self):
+        super(archDistro, self).__init__()
+    
+    def startAgentService(self):
+        return Run("/usr/bin/systemctl start waagent.service", False)
+    
+    def stopAgentService(self):
+        return Run("/usr/bin/systemctl stop waagent.service", False)
+    
+    def registerAgentService(self):
+        return Run("/usr/bin/systemctl enable waagent.service", False)
+    
+    def uninstallAgentService(self):
+        return Run("/usr/bin/systemctl disable waagent.service", False)
+    
+    def unregisterAgentService(self):
+        self.stopAgentService()
+        return self.uninstallAgentService()
+    
+    def restartSshService(self):
+        return Run("/usr/bin/systemctl restart ssh.service", False)
+    
+    def stopDHCP(self):
+        return Run("/usr/bin/systemctl stop dhclient.service", False)
+    
+    def startDHCP(self):
+        return Run("/usr/bin/systemctl start dhclient.service", False)
+    
+    def checkPackagedInstalled(self, p):
+        if Run("/usr/bin/pacman -Q " + p, chk_err=False):
+            return 1
+        else:
+            return 0
+    
+    def checkPackageUpdateable(self, p):
+        if Run("/usr/bin/pacman -Qu " + p, chk_err=False):
+            return 1
+        else:
+            return 0
+
+############################################################
+#   Default distribution
+############################################################
+
+class defaultDistro(AbstractDistro):
+    """
+    Default (otherwise unhandled) concrete class
+    """
+    def __init__(self):
+        super(defaultDistro, self).__init__()
 
 ############################################################
 #   CoreOSDistro
@@ -6004,7 +6059,7 @@ def GetMyDistro(dist_class_name=''):
         Distro=dist_class_name
     if not globals().has_key(dist_class_name):
         print Distro+' is not a supported distribution.'
-        return None
+        return defaultDistro()
     return globals()[dist_class_name]() # the distro class inside this module.
 
 def DistInfo(fullname=0):
@@ -6015,6 +6070,8 @@ def DistInfo(fullname=0):
     
     if 'linux_distribution' in dir(platform):
         distinfo = list(platform.linux_distribution(full_distribution_name=fullname))
+        if os.path.exists('/etc/arch-release'):
+            distinfo = ['arch', '', '']
         distinfo[0] = distinfo[0].strip() # remove trailing whitespace in distro name
         return distinfo
     else:
